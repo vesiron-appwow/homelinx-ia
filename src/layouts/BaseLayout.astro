@@ -5,8 +5,8 @@ export interface Props {
   description?: string;
 }
 const {
-  title = 'HomeLinx – Property Discovery',
-  description = 'Discover properties for sale and rent in Brighton & Sussex.',
+  title = "HomeLinx – Property Discovery",
+  description = "Discover properties for sale and rent in Brighton & Sussex.",
 } = Astro.props;
 ---
 <!DOCTYPE html>
@@ -34,7 +34,7 @@ const {
       --hl-shadow-hover: 0 8px 24px rgba(0,200,232,0.22);
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--hl-light);
       color: var(--hl-dark);
       line-height: 1.6;
@@ -42,7 +42,7 @@ const {
     }
     a { color: inherit; text-decoration: none; }
 
-    /* ── Header ──────────────────────────────── */
+    /* —— Header ——————————————————————————————— */
     .hl-header {
       background: linear-gradient(135deg, var(--hl-cyan), var(--hl-green));
       color: var(--hl-white);
@@ -82,7 +82,7 @@ const {
     }
     .hl-back-btn:hover { background: var(--hl-white); color: var(--hl-cyan); }
 
-    /* ── Footer ──────────────────────────────── */
+    /* —— Footer ——————————————————————————————— */
     .hl-footer {
       background: var(--hl-cyan);
       color: var(--hl-white);
@@ -93,7 +93,7 @@ const {
     }
     .hl-footer a { color: var(--hl-white); font-weight: 600; }
 
-    /* ── Offline banner ──────────────────────── */
+    /* —— Offline banner ————————————————————————— */
     #offline-banner {
       display: none;
       background: #FF6B35;
@@ -111,7 +111,7 @@ const {
   <header class="hl-header">
     <div class="hl-header-inner">
       <a href="/" class="hl-logo">
-        <div class="hl-logo-icon">🏡</div>
+        <div class="hl-logo-icon">🗂</div>
         <div>
           <div class="hl-logo-name">HomeLinx</div>
           <div class="hl-logo-sub">Property Discovery</div>
@@ -126,21 +126,21 @@ const {
   </main>
 
   <footer class="hl-footer">
-    <p>HomeLinx • Powered by <a href="https://appwow.vtl.com">AppWow</a> • Part of the VTL Evosystem</p>
+    <p>HomeLinx • Powered by <a href="https://appwow.app">AppWow</a> • Part of the VTL Evosystem</p>
   </footer>
 
   <script>
     // Service Worker registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
     }
     // Offline banner
     function updateOnlineStatus() {
-      const banner = document.getElementById('offline-banner');
-      if (banner) banner.style.display = navigator.onLine ? 'none' : 'block';
+      const banner = document.getElementById("offline-banner");
+      if (banner) banner.style.display = navigator.onLine ? "none" : "block";
     }
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
     updateOnlineStatus();
   </script>
 </body>
