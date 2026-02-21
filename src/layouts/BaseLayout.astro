@@ -1,0 +1,147 @@
+---
+// src/layouts/BaseLayout.astro
+export interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'HomeLinx – Property Discovery',
+  description = 'Discover properties for sale and rent in Brighton & Sussex.',
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#00C8E8" />
+  <title>{title}</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --hl-cyan:   #00C8E8;
+      --hl-green:  #28A745;
+      --hl-dark:   #0A0A0A;
+      --hl-grey:   #4A4A4A;
+      --hl-light:  #F5F5F5;
+      --hl-white:  #FFFFFF;
+      --hl-border: #E0E0E0;
+      --hl-radius: 12px;
+      --hl-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      --hl-shadow-hover: 0 8px 24px rgba(0,200,232,0.22);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--hl-light);
+      color: var(--hl-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Header ──────────────────────────────── */
+    .hl-header {
+      background: linear-gradient(135deg, var(--hl-cyan), var(--hl-green));
+      color: var(--hl-white);
+      padding: 1.25rem 2rem;
+      box-shadow: var(--hl-shadow);
+    }
+    .hl-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .hl-logo { display: flex; align-items: center; gap: 0.75rem; }
+    .hl-logo-icon {
+      width: 46px; height: 46px;
+      background: var(--hl-white);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--hl-cyan);
+    }
+    .hl-logo-name { font-size: 1.6rem; font-weight: 700; }
+    .hl-logo-sub  { font-size: 0.85rem; opacity: 0.9; }
+    .hl-back-btn {
+      padding: 0.6rem 1.25rem;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 8px;
+      color: var(--hl-white);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .hl-back-btn:hover { background: var(--hl-white); color: var(--hl-cyan); }
+
+    /* ── Footer ──────────────────────────────── */
+    .hl-footer {
+      background: var(--hl-cyan);
+      color: var(--hl-white);
+      text-align: center;
+      padding: 1.25rem 2rem;
+      font-size: 0.9rem;
+      margin-top: 3rem;
+    }
+    .hl-footer a { color: var(--hl-white); font-weight: 600; }
+
+    /* ── Offline banner ──────────────────────── */
+    #offline-banner {
+      display: none;
+      background: #FF6B35;
+      color: white;
+      text-align: center;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="offline-banner">📶 You are offline — showing cached content</div>
+
+  <header class="hl-header">
+    <div class="hl-header-inner">
+      <a href="/" class="hl-logo">
+        <div class="hl-logo-icon">🏡</div>
+        <div>
+          <div class="hl-logo-name">HomeLinx</div>
+          <div class="hl-logo-sub">Property Discovery</div>
+        </div>
+      </a>
+      <button class="hl-back-btn" onclick="history.back()">← Back</button>
+    </div>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer class="hl-footer">
+    <p>HomeLinx • Powered by <a href="https://appwow.vtl.com">AppWow</a> • Part of the VTL Evosystem</p>
+  </footer>
+
+  <script>
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+    // Offline banner
+    function updateOnlineStatus() {
+      const banner = document.getElementById('offline-banner');
+      if (banner) banner.style.display = navigator.onLine ? 'none' : 'block';
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+  </script>
+</body>
+</html>

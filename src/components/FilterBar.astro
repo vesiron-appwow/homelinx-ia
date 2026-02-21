@@ -1,0 +1,152 @@
+---
+// src/components/FilterBar.astro
+// Renders the combined search + filter bar for the listing page
+---
+<section class="filter-bar">
+  <div class="filter-inner">
+    <h2 class="filter-title">Find Properties in Brighton &amp; Sussex</h2>
+    <div class="filter-grid">
+
+      <!-- Tenure toggle -->
+      <div class="filter-field">
+        <label>I'm looking to…</label>
+        <div class="toggle-group" id="tenure-toggle">
+          <button class="toggle-btn active" data-value="sale">Buy</button>
+          <button class="toggle-btn" data-value="rent">Rent</button>
+          <button class="toggle-btn" data-value="all">Both</button>
+        </div>
+      </div>
+
+      <!-- Property type -->
+      <div class="filter-field">
+        <label for="filter-type">Property Type</label>
+        <select id="filter-type">
+          <option value="all">All Types</option>
+          <option value="Flat">Flats</option>
+          <option value="House">Houses</option>
+          <option value="Bungalow">Bungalows</option>
+          <option value="Cottage">Cottages</option>
+          <option value="Studio">Studios</option>
+        </select>
+      </div>
+
+      <!-- Min price -->
+      <div class="filter-field">
+        <label for="filter-min">Min Price</label>
+        <select id="filter-min">
+          <option value="">No Min</option>
+          <option value="500">£500 /mo</option>
+          <option value="1000">£1,000 /mo</option>
+          <option value="150000">£150,000</option>
+          <option value="250000">£250,000</option>
+          <option value="400000">£400,000</option>
+        </select>
+      </div>
+
+      <!-- Max price -->
+      <div class="filter-field">
+        <label for="filter-max">Max Price</label>
+        <select id="filter-max">
+          <option value="">No Max</option>
+          <option value="1200">£1,200 /mo</option>
+          <option value="2000">£2,000 /mo</option>
+          <option value="300000">£300,000</option>
+          <option value="500000">£500,000</option>
+          <option value="750000">£750,000</option>
+        </select>
+      </div>
+
+      <!-- Bedrooms -->
+      <div class="filter-field">
+        <label for="filter-beds">Min Bedrooms</label>
+        <select id="filter-beds">
+          <option value="">Any</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+        </select>
+      </div>
+
+      <!-- Keyword search -->
+      <div class="filter-field filter-field--wide">
+        <label for="filter-keyword">Location / Keyword</label>
+        <input type="text" id="filter-keyword" placeholder="e.g. Brighton, seafront, BN1…" />
+      </div>
+
+      <div class="filter-field filter-field--btn">
+        <button id="filter-apply" class="apply-btn">Search</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+.filter-bar {
+  background: var(--hl-white);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--hl-shadow);
+}
+.filter-inner { max-width: 1400px; margin: 0 auto; }
+.filter-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.25rem; }
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+.filter-field { display: flex; flex-direction: column; gap: 0.4rem; }
+.filter-field--wide { grid-column: span 2; }
+.filter-field--btn { justify-content: flex-end; }
+.filter-field label { font-size: 0.85rem; font-weight: 600; color: var(--hl-grey); }
+.filter-field select,
+.filter-field input {
+  padding: 0.8rem;
+  border: 2px solid var(--hl-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--hl-white);
+  color: var(--hl-dark);
+  width: 100%;
+}
+.filter-field select:focus,
+.filter-field input:focus {
+  outline: none;
+  border-color: var(--hl-cyan);
+}
+.toggle-group { display: flex; gap: 0.5rem; }
+.toggle-btn {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid var(--hl-border);
+  border-radius: 8px;
+  background: var(--hl-light);
+  color: var(--hl-grey);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-btn.active {
+  background: var(--hl-cyan);
+  border-color: var(--hl-cyan);
+  color: white;
+}
+.apply-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--hl-cyan);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.apply-btn:hover { background: var(--hl-green); }
+@media (max-width: 600px) {
+  .filter-field--wide { grid-column: span 1; }
+}
+</style>

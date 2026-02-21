@@ -1,0 +1,213 @@
+---
+// src/pages/property/[id].astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProperty } from '../../lib/api';
+
+const { id } = Astro.params;
+const property = await getProperty(id ?? '');
+
+if (!property) {
+  return Astro.redirect('/');
+}
+
+const isSale = property.tenure === 'sale';
+const priceLabel = isSale
+  ? `£${property.price.toLocaleString()}`
+  : `£${property.price.toLocaleString()} per month`;
+const bedroomLabel = property.bedrooms === 0 ? 'Studio' : `${property.bedrooms} bedroom${property.bedrooms > 1 ? 's' : ''}`;
+
+const ICONS: Record<string, string> = {
+  Flat: '🏢', House: '🏡', Studio: '🏠', Cottage: '🏡', Bungalow: '🏘️',
+};
+const icon = ICONS[property.property_type] ?? '🏠';
+---
+<BaseLayout title={`${property.title} – HomeLinx`} description={`${property.property_type} ${isSale ? 'for sale' : 'to rent'} in ${property.location}`}>
+  <div class="detail-wrap">
+
+    <!-- Hero image -->
+    <div class="detail-hero">{icon}</div>
+
+    <div class="detail-body">
+
+      <!-- Title block -->
+      <div class="detail-header">
+        <div>
+          <span class={`tenure-badge ${isSale ? 'badge-sale' : 'badge-rent'}`}>
+            {isSale ? 'For Sale' : 'To Rent'}
+          </span>
+          <h1 class="detail-title">{property.title}</h1>
+          <p class="detail-location">📍 {property.location}</p>
+        </div>
+        <div class="detail-price">{priceLabel}</div>
+      </div>
+
+      <!-- Key specs -->
+      <div class="detail-specs">
+        <div class="spec-card">
+          <span class="spec-icon">🛏</span>
+          <span class="spec-label">{bedroomLabel}</span>
+        </div>
+        <div class="spec-card">
+          <span class="spec-icon">🚿</span>
+          <span class="spec-label">{property.bathrooms} bathroom{property.bathrooms > 1 ? 's' : ''}</span>
+        </div>
+        <div class="spec-card">
+          <span class="spec-icon">🏷</span>
+          <span class="spec-label">{property.property_type}</span>
+        </div>
+        <div class="spec-card">
+          <span class="spec-icon">📋</span>
+          <span class="spec-label">{isSale ? 'Freehold / Leasehold' : 'Monthly tenancy'}</span>
+        </div>
+      </div>
+
+      <!-- Description block -->
+      <div class="detail-section">
+        <h2>About this property</h2>
+        <p>
+          This {property.bedrooms === 0 ? 'studio' : `${property.bedrooms}-bedroom`} {property.property_type.toLowerCase()} is located in {property.location}.
+          {isSale
+            ? `Offered for sale at ${priceLabel}, this is a great opportunity in the Brighton & Sussex market.`
+            : `Available to rent at ${priceLabel}, offering flexible tenancy terms.`}
+          Contact the agent for full details, viewings, and availability.
+        </p>
+      </div>
+
+      <!-- Key details -->
+      <div class="detail-section">
+        <h2>Property details</h2>
+        <div class="kv-grid">
+          <div class="kv-row"><span>Type</span><span>{property.property_type}</span></div>
+          <div class="kv-row"><span>Tenure</span><span>{isSale ? 'For Sale' : 'To Rent'}</span></div>
+          <div class="kv-row"><span>Bedrooms</span><span>{bedroomLabel}</span></div>
+          <div class="kv-row"><span>Bathrooms</span><span>{property.bathrooms}</span></div>
+          <div class="kv-row"><span>Location</span><span>{property.location}</span></div>
+          <div class="kv-row"><span>Listed</span><span>{new Date(property.created_at).toLocaleDateString('en-GB')}</span></div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="detail-cta">
+        <a href="/" class="cta-back">← All Properties</a>
+        <button class="cta-enquire" onclick="alert('Enquiry form — connect to your CRM via VTL API')">
+          📩 Enquire Now
+        </button>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.detail-wrap { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+.detail-hero {
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, #e8f8fb, #d0f0e0);
+  border-radius: var(--hl-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7rem;
+  margin-bottom: 1.5rem;
+}
+.detail-body {
+  background: var(--hl-white);
+  border-radius: var(--hl-radius);
+  padding: 2rem;
+  box-shadow: var(--hl-shadow);
+}
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--hl-light);
+}
+.tenure-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.badge-sale { background: #E8F8FB; color: var(--hl-cyan); }
+.badge-rent { background: #E8F5EC; color: var(--hl-green); }
+.detail-title { font-size: 1.8rem; font-weight: 700; }
+.detail-location { color: var(--hl-grey); margin-top: 0.3rem; font-size: 1rem; }
+.detail-price { font-size: 2rem; font-weight: 700; color: var(--hl-cyan); white-space: nowrap; }
+
+.detail-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.spec-card {
+  background: var(--hl-light);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+.spec-icon { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
+.spec-label { font-size: 0.88rem; font-weight: 600; color: var(--hl-grey); }
+
+.detail-section { margin-bottom: 2rem; }
+.detail-section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--hl-dark);
+}
+.detail-section p { color: var(--hl-grey); line-height: 1.7; }
+
+.kv-grid { display: flex; flex-direction: column; gap: 0; }
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--hl-light);
+  font-size: 0.95rem;
+}
+.kv-row span:first-child { color: var(--hl-grey); }
+.kv-row span:last-child  { font-weight: 600; }
+
+.detail-cta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--hl-light);
+}
+.cta-back {
+  padding: 0.85rem 1.5rem;
+  border: 2px solid var(--hl-border);
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--hl-grey);
+  background: var(--hl-white);
+  transition: all 0.2s;
+}
+.cta-back:hover { border-color: var(--hl-cyan); color: var(--hl-cyan); }
+.cta-enquire {
+  flex: 1;
+  padding: 0.85rem 1.5rem;
+  background: var(--hl-cyan);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cta-enquire:hover { background: var(--hl-green); }
+@media (max-width: 600px) {
+  .detail-header { flex-direction: column; }
+  .detail-price { font-size: 1.6rem; }
+}
+</style>
