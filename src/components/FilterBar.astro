@@ -4,17 +4,26 @@
 ---
 <section class="filter-bar">
   <div class="filter-inner">
-    <h2 class="filter-title">Find Properties in Brighton &amp; Sussex</h2>
+    <h2 class="filter-title">Find Properties both Local &amp; Global</h2>
+
     <div class="filter-grid">
 
-      <!-- Tenure toggle -->
+      <!-- Listing Type -->
       <div class="filter-field">
-        <label>I'm looking to…</label>
-        <div class="toggle-group" id="tenure-toggle">
-          <button class="toggle-btn active" data-value="sale">Buy</button>
-          <button class="toggle-btn" data-value="rent">Rent</button>
-          <button class="toggle-btn" data-value="all">Both</button>
-        </div>
+        <label for="filter-listing">Listing</label>
+        <select id="filter-listing">
+          <option value="sale" selected>For Sale</option>
+          <option value="rent">To Rent</option>
+        </select>
+      </div>
+
+      <!-- Property Class -->
+      <div class="filter-field">
+        <label for="filter-class">Class</label>
+        <select id="filter-class">
+          <option value="residential" selected>Residential</option>
+          <option value="commercial">Commercial</option>
+        </select>
       </div>
 
       <!-- Property type -->
@@ -22,42 +31,37 @@
         <label for="filter-type">Property Type</label>
         <select id="filter-type">
           <option value="all">All Types</option>
-          <option value="Flat">Flats</option>
-          <option value="House">Houses</option>
-          <option value="Bungalow">Bungalows</option>
-          <option value="Cottage">Cottages</option>
-          <option value="Studio">Studios</option>
+
+          <!-- Residential types -->
+          <option value="Flat" data-class="residential">Flats</option>
+          <option value="House" data-class="residential">Houses</option>
+          <option value="Bungalow" data-class="residential">Bungalows</option>
+          <option value="Cottage" data-class="residential">Cottages</option>
+          <option value="Studio" data-class="residential">Studios</option>
+
+          <!-- Commercial types -->
+          <option value="Office" data-class="commercial">Office</option>
+          <option value="Retail" data-class="commercial">Retail</option>
+          <option value="Industrial" data-class="commercial">Industrial</option>
+          <option value="Warehouse" data-class="commercial">Warehouse</option>
+          <option value="Land" data-class="commercial">Land</option>
         </select>
       </div>
 
       <!-- Min price -->
       <div class="filter-field">
-        <label for="filter-min">Min Price</label>
-        <select id="filter-min">
-          <option value="">No Min</option>
-          <option value="500">£500 /mo</option>
-          <option value="1000">£1,000 /mo</option>
-          <option value="150000">£150,000</option>
-          <option value="250000">£250,000</option>
-          <option value="400000">£400,000</option>
-        </select>
+        <label for="filter-min" id="label-min">Min Price</label>
+        <select id="filter-min"></select>
       </div>
 
       <!-- Max price -->
       <div class="filter-field">
-        <label for="filter-max">Max Price</label>
-        <select id="filter-max">
-          <option value="">No Max</option>
-          <option value="1200">£1,200 /mo</option>
-          <option value="2000">£2,000 /mo</option>
-          <option value="300000">£300,000</option>
-          <option value="500000">£500,000</option>
-          <option value="750000">£750,000</option>
-        </select>
+        <label for="filter-max" id="label-max">Max Price</label>
+        <select id="filter-max"></select>
       </div>
 
-      <!-- Bedrooms -->
-      <div class="filter-field">
+      <!-- Bedrooms (Residential only) -->
+      <div class="filter-field" id="beds-field">
         <label for="filter-beds">Min Bedrooms</label>
         <select id="filter-beds">
           <option value="">Any</option>
@@ -115,24 +119,6 @@
   outline: none;
   border-color: var(--hl-cyan);
 }
-.toggle-group { display: flex; gap: 0.5rem; }
-.toggle-btn {
-  flex: 1;
-  padding: 0.75rem 0.5rem;
-  border: 2px solid var(--hl-border);
-  border-radius: 8px;
-  background: var(--hl-light);
-  color: var(--hl-grey);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.toggle-btn.active {
-  background: var(--hl-cyan);
-  border-color: var(--hl-cyan);
-  color: white;
-}
 .apply-btn {
   width: 100%;
   padding: 0.85rem;
@@ -146,7 +132,208 @@
   transition: background 0.2s;
 }
 .apply-btn:hover { background: var(--hl-green); }
+
 @media (max-width: 600px) {
   .filter-field--wide { grid-column: span 1; }
 }
 </style>
+
+<script>
+  const listingEl = document.getElementById('filter-listing');
+  const classEl   = document.getElementById('filter-class');
+  const typeEl    = document.getElementById('filter-type');
+
+  const minEl     = document.getElementById('filter-min');
+  const maxEl     = document.getElementById('filter-max');
+  const minLabel  = document.getElementById('label-min');
+  const maxLabel  = document.getElementById('label-max');
+
+  const bedsField = document.getElementById('beds-field');
+
+  const APPLY_ID  = 'filter-apply';
+
+  function money(n) {
+    return new Intl.NumberFormat('en-GB').format(n);
+  }
+
+  function setOptions(selectEl, options, selectedValue = '') {
+    selectEl.innerHTML = '';
+    for (const opt of options) {
+      const o = document.createElement('option');
+      o.value = opt.value;
+      o.textContent = opt.label;
+      if (selectedValue && opt.value === selectedValue) o.selected = true;
+      selectEl.appendChild(o);
+    }
+  }
+
+  function priceOptions(mode) {
+    // mode: 'res_sale' | 'res_rent' | 'com_sale' | 'com_rent'
+    if (mode === 'res_rent') {
+      // £/month
+      return {
+        min: [
+          { value: '', label: 'No Min' },
+          { value: '500',  label: `£${money(500)} /mo` },
+          { value: '750',  label: `£${money(750)} /mo` },
+          { value: '1000', label: `£${money(1000)} /mo` },
+          { value: '1500', label: `£${money(1500)} /mo` },
+          { value: '2000', label: `£${money(2000)} /mo` },
+        ],
+        max: [
+          { value: '', label: 'No Max' },
+          { value: '1000', label: `£${money(1000)} /mo` },
+          { value: '1500', label: `£${money(1500)} /mo` },
+          { value: '2000', label: `£${money(2000)} /mo` },
+          { value: '3000', label: `£${money(3000)} /mo` },
+          { value: '5000', label: `£${money(5000)} /mo` },
+        ],
+        labelSuffix: ' (£/month)'
+      };
+    }
+
+    if (mode === 'com_rent') {
+      // £/annum (pa)
+      return {
+        min: [
+          { value: '', label: 'No Min' },
+          { value: '5000',  label: `£${money(5000)} pa` },
+          { value: '10000', label: `£${money(10000)} pa` },
+          { value: '20000', label: `£${money(20000)} pa` },
+          { value: '40000', label: `£${money(40000)} pa` },
+          { value: '75000', label: `£${money(75000)} pa` },
+        ],
+        max: [
+          { value: '', label: 'No Max' },
+          { value: '10000',  label: `£${money(10000)} pa` },
+          { value: '20000',  label: `£${money(20000)} pa` },
+          { value: '40000',  label: `£${money(40000)} pa` },
+          { value: '75000',  label: `£${money(75000)} pa` },
+          { value: '150000', label: `£${money(150000)} pa` },
+        ],
+        labelSuffix: ' (£/annum)'
+      };
+    }
+
+    // Sales (both res/com) — show capital values
+    return {
+      min: [
+        { value: '', label: 'No Min' },
+        { value: '100000', label: `£${money(100000)}` },
+        { value: '150000', label: `£${money(150000)}` },
+        { value: '250000', label: `£${money(250000)}` },
+        { value: '400000', label: `£${money(400000)}` },
+        { value: '750000', label: `£${money(750000)}` },
+      ],
+      max: [
+        { value: '', label: 'No Max' },
+        { value: '250000',  label: `£${money(250000)}` },
+        { value: '400000',  label: `£${money(400000)}` },
+        { value: '750000',  label: `£${money(750000)}` },
+        { value: '1000000', label: `£${money(1000000)}` },
+        { value: '2000000', label: `£${money(2000000)}` },
+      ],
+      labelSuffix: ''
+    };
+  }
+
+  function syncTypeOptions() {
+    const cls = classEl.value; // residential|commercial
+    const options = Array.from(typeEl.querySelectorAll('option'));
+    for (const o of options) {
+      if (o.value === 'all') {
+        o.hidden = false;
+        continue;
+      }
+      const c = o.getAttribute('data-class');
+      o.hidden = (c && c !== cls);
+    }
+    // If current selected option is hidden, reset to all
+    const selected = typeEl.options[typeEl.selectedIndex];
+    if (selected && selected.hidden) typeEl.value = 'all';
+  }
+
+  function syncBedsVisibility() {
+    const cls = classEl.value;
+    bedsField.style.display = (cls === 'residential') ? 'flex' : 'none';
+    if (cls !== 'residential') {
+      const beds = document.getElementById('filter-beds');
+      if (beds) beds.value = '';
+    }
+  }
+
+  function syncPriceOptions() {
+    const cls = classEl.value;       // residential|commercial
+    const listing = listingEl.value; // sale|rent
+
+    const mode =
+      (cls === 'residential' && listing === 'rent') ? 'res_rent' :
+      (cls === 'commercial'  && listing === 'rent') ? 'com_rent' :
+      (cls === 'commercial'  && listing === 'sale') ? 'com_sale' :
+                                                      'res_sale';
+
+    const cfg = priceOptions(mode);
+
+    minLabel.textContent = `Min Price${cfg.labelSuffix}`;
+    maxLabel.textContent = `Max Price${cfg.labelSuffix}`;
+
+    const prevMin = minEl.value;
+    const prevMax = maxEl.value;
+
+    setOptions(minEl, cfg.min, prevMin);
+    setOptions(maxEl, cfg.max, prevMax);
+  }
+
+  function emitFiltersChanged() {
+    const detail = {
+      listing: listingEl.value,          // sale|rent
+      propertyClass: classEl.value,      // residential|commercial
+      propertyType: typeEl.value,        // all|Flat|Office|...
+      minPrice: minEl.value || null,
+      maxPrice: maxEl.value || null,
+      beds: (document.getElementById('filter-beds')?.value) || null,
+      keyword: (document.getElementById('filter-keyword')?.value || '').trim() || null,
+    };
+    window.dispatchEvent(new CustomEvent('filters:changed', { detail }));
+  }
+
+  // Init
+  syncTypeOptions();
+  syncBedsVisibility();
+  syncPriceOptions();
+  emitFiltersChanged();
+
+  // Wiring
+  listingEl.addEventListener('change', () => {
+    syncPriceOptions();
+    emitFiltersChanged();
+  });
+
+  classEl.addEventListener('change', () => {
+    syncTypeOptions();
+    syncBedsVisibility();
+    syncPriceOptions();
+    emitFiltersChanged();
+  });
+
+  typeEl.addEventListener('change', emitFiltersChanged);
+  minEl.addEventListener('change', emitFiltersChanged);
+  maxEl.addEventListener('change', emitFiltersChanged);
+
+  const bedsEl = document.getElementById('filter-beds');
+  if (bedsEl) bedsEl.addEventListener('change', emitFiltersChanged);
+
+  const kwEl = document.getElementById('filter-keyword');
+  if (kwEl) kwEl.addEventListener('input', () => {
+    // light touch (no debouncing yet)
+    emitFiltersChanged();
+  });
+
+  // Search button should remain the explicit action
+  const applyBtn = document.getElementById(APPLY_ID);
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      emitFiltersChanged();
+    });
+  }
+</script>

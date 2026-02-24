@@ -4,11 +4,26 @@ export interface Property {
   id: string;
   title: string;
   slug: string;
+
+  type: 'residential' | 'commercial';
+  listing_type: 'sale' | 'rent';
+
+  currency: string; // ISO 4217 (GBP, EUR, USD, etc.)
+  price: number;
+  rent_frequency?: 'monthly' | 'annum';
+
+  category?: string;
   summary?: string;
-  price?: number;
   location?: string;
+
+  // Residential
   bedrooms?: number;
   bathrooms?: number;
+
+  // Commercial
+  floor_area?: number;
+  use_class?: string;
+
   image?: string;
 }
 
@@ -17,6 +32,8 @@ const BASE_URL = import.meta.env.PUBLIC_VTL_API_URL;
 export async function searchProperties(params: {
   q?: string;
   location?: string;
+  type?: 'residential' | 'commercial';
+  listing_type?: 'sale' | 'rent';
 }): Promise<{ results: Property[]; count: number }> {
 
   // If no API configured → return empty result set
@@ -25,7 +42,15 @@ export async function searchProperties(params: {
   }
 
   try {
-    const query = new URLSearchParams(params as Record<string, string>);
+    const query = new URLSearchParams(
+      Object.entries(params)
+        .filter(([, v]) => v !== undefined && v !== '')
+        .reduce<Record<string, string>>((acc, [k, v]) => {
+          if (v !== undefined) acc[k] = String(v);
+          return acc;
+        }, {})
+    );
+
     const res = await fetch(`${BASE_URL}/properties?${query.toString()}`);
 
     if (!res.ok) throw new Error("API error");

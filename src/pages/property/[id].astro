@@ -1,7 +1,9 @@
 ---
 // src/pages/property/[id].astro
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPropertyById } from '../../lib/api';
+import { getPropertyById
+  
+ } from '../../lib/api';
 
 const { id } = Astro.params;
 const property = await getPropertyById(id ?? '');
