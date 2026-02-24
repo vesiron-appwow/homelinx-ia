@@ -1,10 +1,10 @@
 ---
 // src/pages/property/[id].astro
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProperty } from '../../lib/api';
+import { getPropertyById } from '../../lib/api';
 
 const { id } = Astro.params;
-const property = await getProperty(id ?? '');
+const property = await getPropertyById(id ?? '');
 
 if (!property) {
   return Astro.redirect('/');

@@ -3,9 +3,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FilterBar from '../components/FilterBar.astro';
 import PropertyCard from '../components/PropertyCard.astro';
-import { getProperties } from '../lib/api';
+import { searchProperties } from '../lib/api';
 
-const properties = await getProperties();
+const { results } = await searchProperties({});
+const properties = results;
 ---
 <BaseLayout>
   <FilterBar />
