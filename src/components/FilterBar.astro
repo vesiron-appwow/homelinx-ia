@@ -29,23 +29,7 @@
       <!-- Property type -->
       <div class="filter-field">
         <label for="filter-type">Property Type</label>
-        <select id="filter-type">
-          <option value="all">All Types</option>
-
-          <!-- Residential types -->
-          <option value="Flat" data-class="residential">Flats</option>
-          <option value="House" data-class="residential">Houses</option>
-          <option value="Bungalow" data-class="residential">Bungalows</option>
-          <option value="Cottage" data-class="residential">Cottages</option>
-          <option value="Studio" data-class="residential">Studios</option>
-
-          <!-- Commercial types -->
-          <option value="Office" data-class="commercial">Office</option>
-          <option value="Retail" data-class="commercial">Retail</option>
-          <option value="Industrial" data-class="commercial">Industrial</option>
-          <option value="Warehouse" data-class="commercial">Warehouse</option>
-          <option value="Land" data-class="commercial">Land</option>
-        </select>
+        <select id="filter-type"></select>
       </div>
 
       <!-- Min price -->
@@ -87,6 +71,7 @@
 </section>
 
 <style>
+/* Your existing styles unchanged */
 .filter-bar {
   background: var(--hl-white);
   padding: 1.75rem 2rem;
@@ -132,7 +117,6 @@
   transition: background 0.2s;
 }
 .apply-btn:hover { background: var(--hl-green); }
-
 @media (max-width: 600px) {
   .filter-field--wide { grid-column: span 1; }
 }
@@ -149,12 +133,24 @@
   const maxLabel  = document.getElementById('label-max');
 
   const bedsField = document.getElementById('beds-field');
-
   const APPLY_ID  = 'filter-apply';
 
-  function money(n) {
-    return new Intl.NumberFormat('en-GB').format(n);
-  }
+  const PROPERTY_TYPES = {
+    residential: [
+      { value: 'Flat', label: 'Flats' },
+      { value: 'House', label: 'Houses' },
+      { value: 'Bungalow', label: 'Bungalows' },
+      { value: 'Cottage', label: 'Cottages' },
+      { value: 'Studio', label: 'Studios' }
+    ],
+    commercial: [
+      { value: 'Office', label: 'Office' },
+      { value: 'Retail', label: 'Retail' },
+      { value: 'Industrial', label: 'Industrial' },
+      { value: 'Warehouse', label: 'Warehouse' },
+      { value: 'Land', label: 'Land' }
+    ]
+  };
 
   function setOptions(selectEl, options, selectedValue = '') {
     selectEl.innerHTML = '';
@@ -167,109 +163,85 @@
     }
   }
 
-  function priceOptions(mode) {
-    // mode: 'res_sale' | 'res_rent' | 'com_sale' | 'com_rent'
-    if (mode === 'res_rent') {
-      // £/month
-      return {
-        min: [
-          { value: '', label: 'No Min' },
-          { value: '500',  label: `£${money(500)} /mo` },
-          { value: '750',  label: `£${money(750)} /mo` },
-          { value: '1000', label: `£${money(1000)} /mo` },
-          { value: '1500', label: `£${money(1500)} /mo` },
-          { value: '2000', label: `£${money(2000)} /mo` },
-        ],
-        max: [
-          { value: '', label: 'No Max' },
-          { value: '1000', label: `£${money(1000)} /mo` },
-          { value: '1500', label: `£${money(1500)} /mo` },
-          { value: '2000', label: `£${money(2000)} /mo` },
-          { value: '3000', label: `£${money(3000)} /mo` },
-          { value: '5000', label: `£${money(5000)} /mo` },
-        ],
-        labelSuffix: ' (£/month)'
-      };
-    }
-
-    if (mode === 'com_rent') {
-      // £/annum (pa)
-      return {
-        min: [
-          { value: '', label: 'No Min' },
-          { value: '5000',  label: `£${money(5000)} pa` },
-          { value: '10000', label: `£${money(10000)} pa` },
-          { value: '20000', label: `£${money(20000)} pa` },
-          { value: '40000', label: `£${money(40000)} pa` },
-          { value: '75000', label: `£${money(75000)} pa` },
-        ],
-        max: [
-          { value: '', label: 'No Max' },
-          { value: '10000',  label: `£${money(10000)} pa` },
-          { value: '20000',  label: `£${money(20000)} pa` },
-          { value: '40000',  label: `£${money(40000)} pa` },
-          { value: '75000',  label: `£${money(75000)} pa` },
-          { value: '150000', label: `£${money(150000)} pa` },
-        ],
-        labelSuffix: ' (£/annum)'
-      };
-    }
-
-    // Sales (both res/com) — show capital values
-    return {
-      min: [
-        { value: '', label: 'No Min' },
-        { value: '100000', label: `£${money(100000)}` },
-        { value: '150000', label: `£${money(150000)}` },
-        { value: '250000', label: `£${money(250000)}` },
-        { value: '400000', label: `£${money(400000)}` },
-        { value: '750000', label: `£${money(750000)}` },
-      ],
-      max: [
-        { value: '', label: 'No Max' },
-        { value: '250000',  label: `£${money(250000)}` },
-        { value: '400000',  label: `£${money(400000)}` },
-        { value: '750000',  label: `£${money(750000)}` },
-        { value: '1000000', label: `£${money(1000000)}` },
-        { value: '2000000', label: `£${money(2000000)}` },
-      ],
-      labelSuffix: ''
-    };
-  }
-
   function syncTypeOptions() {
-    const cls = classEl.value; // residential|commercial
-    const options = Array.from(typeEl.querySelectorAll('option'));
-    for (const o of options) {
-      if (o.value === 'all') {
-        o.hidden = false;
-        continue;
-      }
-      const c = o.getAttribute('data-class');
-      o.hidden = (c && c !== cls);
-    }
-    // If current selected option is hidden, reset to all
-    const selected = typeEl.options[typeEl.selectedIndex];
-    if (selected && selected.hidden) typeEl.value = 'all';
+    const cls = classEl.value;
+    const previous = typeEl.value;
+
+    const options = [
+      { value: 'all', label: cls === 'commercial' ? 'All Commercial Types' : 'All Residential Types' },
+      ...PROPERTY_TYPES[cls]
+    ];
+
+    setOptions(typeEl, options, previous);
   }
 
   function syncBedsVisibility() {
     const cls = classEl.value;
     bedsField.style.display = (cls === 'residential') ? 'flex' : 'none';
     if (cls !== 'residential') {
-      const beds = document.getElementById('filter-beds');
-      if (beds) beds.value = '';
+      document.getElementById('filter-beds').value = '';
     }
   }
 
+  function money(n) {
+    return new Intl.NumberFormat('en-GB').format(n);
+  }
+
+  function priceOptions(mode) {
+    if (mode === 'res_rent') {
+      return {
+        min: [
+          { value: '', label: 'No Min' },
+          { value: '500',  label: `£${money(500)} /mo` },
+          { value: '1000', label: `£${money(1000)} /mo` },
+        ],
+        max: [
+          { value: '', label: 'No Max' },
+          { value: '2000', label: `£${money(2000)} /mo` },
+          { value: '3000', label: `£${money(3000)} /mo` },
+        ],
+        labelSuffix: ' (£/month)'
+      };
+    }
+
+    if (mode === 'com_rent') {
+      return {
+        min: [
+          { value: '', label: 'No Min' },
+          { value: '5000', label: `£${money(5000)} pa` },
+          { value: '20000', label: `£${money(20000)} pa` },
+        ],
+        max: [
+          { value: '', label: 'No Max' },
+          { value: '50000', label: `£${money(50000)} pa` },
+          { value: '100000', label: `£${money(100000)} pa` },
+        ],
+        labelSuffix: ' (£/annum)'
+      };
+    }
+
+    return {
+      min: [
+        { value: '', label: 'No Min' },
+        { value: '100000', label: `£${money(100000)}` },
+        { value: '250000', label: `£${money(250000)}` },
+      ],
+      max: [
+        { value: '', label: 'No Max' },
+        { value: '500000', label: `£${money(500000)}` },
+        { value: '1000000', label: `£${money(1000000)}` },
+      ],
+      labelSuffix: ''
+    };
+  }
+
   function syncPriceOptions() {
-    const cls = classEl.value;       // residential|commercial
-    const listing = listingEl.value; // sale|rent
+    const cls = classEl.value;
+    const listing = listingEl.value;
 
     const mode =
       (cls === 'residential' && listing === 'rent') ? 'res_rent' :
       (cls === 'commercial'  && listing === 'rent') ? 'com_rent' :
-      (cls === 'commercial'  && listing === 'sale') ? 'com_sale' :
                                                       'res_sale';
 
     const cfg = priceOptions(mode);
@@ -277,38 +249,31 @@
     minLabel.textContent = `Min Price${cfg.labelSuffix}`;
     maxLabel.textContent = `Max Price${cfg.labelSuffix}`;
 
-    const prevMin = minEl.value;
-    const prevMax = maxEl.value;
-
-    setOptions(minEl, cfg.min, prevMin);
-    setOptions(maxEl, cfg.max, prevMax);
+    setOptions(minEl, cfg.min, minEl.value);
+    setOptions(maxEl, cfg.max, maxEl.value);
   }
 
   function emitFiltersChanged() {
-    const detail = {
-      listing: listingEl.value,          // sale|rent
-      propertyClass: classEl.value,      // residential|commercial
-      propertyType: typeEl.value,        // all|Flat|Office|...
-      minPrice: minEl.value || null,
-      maxPrice: maxEl.value || null,
-      beds: (document.getElementById('filter-beds')?.value) || null,
-      keyword: (document.getElementById('filter-keyword')?.value || '').trim() || null,
-    };
-    window.dispatchEvent(new CustomEvent('filters:changed', { detail }));
+    window.dispatchEvent(new CustomEvent('filters:changed', {
+      detail: {
+        listing: listingEl.value,
+        propertyClass: classEl.value,
+        propertyType: typeEl.value,
+        minPrice: minEl.value || null,
+        maxPrice: maxEl.value || null,
+        beds: document.getElementById('filter-beds').value || null,
+        keyword: document.getElementById('filter-keyword').value.trim() || null,
+      }
+    }));
   }
 
-  // Init
+  // INIT
   syncTypeOptions();
   syncBedsVisibility();
   syncPriceOptions();
   emitFiltersChanged();
 
-  // Wiring
-  listingEl.addEventListener('change', () => {
-    syncPriceOptions();
-    emitFiltersChanged();
-  });
-
+  // EVENTS
   classEl.addEventListener('change', () => {
     syncTypeOptions();
     syncBedsVisibility();
@@ -316,24 +281,16 @@
     emitFiltersChanged();
   });
 
-  typeEl.addEventListener('change', emitFiltersChanged);
-  minEl.addEventListener('change', emitFiltersChanged);
-  maxEl.addEventListener('change', emitFiltersChanged);
-
-  const bedsEl = document.getElementById('filter-beds');
-  if (bedsEl) bedsEl.addEventListener('change', emitFiltersChanged);
-
-  const kwEl = document.getElementById('filter-keyword');
-  if (kwEl) kwEl.addEventListener('input', () => {
-    // light touch (no debouncing yet)
+  listingEl.addEventListener('change', () => {
+    syncPriceOptions();
     emitFiltersChanged();
   });
 
-  // Search button should remain the explicit action
-  const applyBtn = document.getElementById(APPLY_ID);
-  if (applyBtn) {
-    applyBtn.addEventListener('click', () => {
-      emitFiltersChanged();
-    });
-  }
+  typeEl.addEventListener('change', emitFiltersChanged);
+  minEl.addEventListener('change', emitFiltersChanged);
+  maxEl.addEventListener('change', emitFiltersChanged);
+  document.getElementById('filter-beds').addEventListener('change', emitFiltersChanged);
+  document.getElementById('filter-keyword').addEventListener('input', emitFiltersChanged);
+  document.getElementById(APPLY_ID).addEventListener('click', emitFiltersChanged);
+
 </script>
